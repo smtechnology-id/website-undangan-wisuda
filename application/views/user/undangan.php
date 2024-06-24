@@ -102,9 +102,13 @@ function format_indonesia($date_string)
                                                 </td>
                                                 <td><?= $u->nama_golongan ?></td> <!-- Menampilkan nama golongan -->
                                                 <td><?= $u->status ?></td>
-                                                <td><a href="<?= base_url('user/preview') ?>?id=<?= $u->id?>" class="btn btn-link" target="_blank">Preview Undangan</a></td>
+                                                <td><a href="<?= base_url('user/preview') ?>?id=<?= $u->id ?>" class="btn btn-link" target="_blank">Preview Undangan</a></td>
                                                 <td>
-                                                    <a href="<?= base_url('user/setujuiUndangan')?>?id=<?= $u->id?>" class="btn btn-primary">Setujui Undangan</a>
+                                                    <?php if ($u->status == 'accepted') : ?>
+                                                        <span>Undangan telah disetujui</span>
+                                                    <?php else : ?>
+                                                        <a href="<?= base_url('user/setujuiUndangan') ?>?id=<?= $u->id ?>" class="btn btn-primary">Setujui Undangan</a>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -124,4 +128,3 @@ function format_indonesia($date_string)
 
     </div>
     <!-- content -->
-

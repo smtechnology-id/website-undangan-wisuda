@@ -76,7 +76,7 @@
                                                                     </div>
 
                                                                     <div class="form-group mb-3">
-                                                                        <input type="text" name="id_golongan" value="<?= $gol->id ?>">
+                                                                        <input type="hidden" name="id_golongan" value="<?= $gol->id ?>">
                                                                         <?= form_error('id_golongan', '<small class="text-danger">', '</small>'); ?>
                                                                     </div>
 

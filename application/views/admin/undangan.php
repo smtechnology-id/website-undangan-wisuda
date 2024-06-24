@@ -47,9 +47,10 @@ function format_indonesia($date_string)
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <?php $no = 1; ?>
                                         <?php foreach ($undangan as $u) : ?>
                                             <tr>
-                                                <td><?= $u->id ?></td>
+                                                <td><?= $no++ ?></td>
                                                 <td><?= $u->nama_acara ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detail<?= $u->id ?>">Detail</button>

@@ -57,5 +57,20 @@ class ModelTamu extends CI_Model
     {
         return $this->db->count_all('tamu');
     }
+
+    public function update_tamu($id, $data)
+    {
+        $this->db->where('id', $id);
+        $this->db->update('tamu', $data);
+    }
+
+    public function get_tamu_golongan_id($id)
+    {
+        $this->db->select('id_golongan');
+        $this->db->from('tamu');
+        $this->db->where('id', $id);
+        $result = $this->db->get()->row();
+        return $result ? $result->id_golongan : null;
+    }
     
 }

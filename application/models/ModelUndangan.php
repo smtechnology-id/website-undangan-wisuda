@@ -26,16 +26,14 @@ class ModelUndangan extends CI_Model
     {
         $this->db->delete($table, $where);
     }
-    public function get_undangan_with_golongan($table, $status = '')
+    public function get_undangan_with_golongan()
     {
         $this->db->select('undangan.*, golongan.nama_golongan');
-        $this->db->from($table);
+        $this->db->from('undangan');
         $this->db->join('golongan', 'undangan.golongan_id = golongan.id');
-        if (!empty($status)) {
-            $this->db->where('undangan.status', $status);
-        }
         return $this->db->get()->result();
     }
+
 
     public function get_undangan_by_id($id)
     {

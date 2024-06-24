@@ -22,7 +22,6 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="container">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTamu">Tambah Tamu</button>
 
                             <table class="table table-bordered text-center mt-3">
                                 <thead>

@@ -248,7 +248,7 @@ class Admin extends CI_Controller
 
             $this->ModelTamu->insert_data('tamu', $data);
             $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Tamu berhasil ditambahkan!</div>');
-            redirect('admin/tamu');
+            redirect('admin/golongan');
         }
     }
 
@@ -469,5 +469,30 @@ class Admin extends CI_Controller
         $this->ciqrcode->generate($params);
 
         return base_url('assets/images/' . $image_name);
+    }
+    public function updateTamu()
+    {
+        $this->form_validation->set_rules('nama_tamu', 'Nama Tamu', 'required');
+        $this->form_validation->set_rules('no_hp', 'No HP', 'required');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
+
+        if ($this->form_validation->run() == false) {
+            $this->session->set_flashdata('error', 'Gagal mengupdate data tamu. Pastikan semua kolom diisi dengan benar.');
+            redirect('admin/editTamu?id=' . $this->input->post('id'));
+        } else {
+            $data = [
+                'nama_tamu' => $this->input->post('nama_tamu'),
+                'no_hp' => $this->input->post('no_hp'),
+                'alamat' => $this->input->post('alamat')
+            ];
+
+            $id = $this->input->post('id');
+            $id_golongan = $this->ModelTamu->get_tamu_golongan_id($id); // Mendapatkan id_golongan dari tamu
+
+            $this->ModelTamu->update_tamu($id, $data);
+
+            $this->session->set_flashdata('success', 'Data tamu berhasil diupdate.');
+            redirect('admin/listTamuGolongan?id=' . $id_golongan); // Redirect ke halaman listTamuGolongan
+        }
     }
 }
