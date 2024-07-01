@@ -19,6 +19,7 @@
                     <div class="card-body">
                         <div class="container">
                             <a href="<?= base_url('admin/golongan') ?>" class="btn btn-outline-primary mb-3"><i class="ri-arrow-left-line"></i> Kembali</a>
+                            <a href="<?= base_url('admin/exportTamuGolongan?id=') . $this->input->get('id') ?>" class="btn btn-success mb-3">Export to Excel</a>
                             <table class="table table-bordered text-center mt-3">
                                 <thead>
                                     <tr>

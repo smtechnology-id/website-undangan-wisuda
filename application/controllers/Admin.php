@@ -1,6 +1,12 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+
+
 class Admin extends CI_Controller
 {
     public function __construct()
@@ -381,31 +387,101 @@ class Admin extends CI_Controller
     }
     public function bukuTamu()
     {
-        $undangan_id = $this->input->get('id'); // Ambil id undangan dari URL
-        $data['undangan'] = $this->ModelUndangan->get_by_id($undangan_id); // Mendapatkan data undangan berdasarkan id
+        $undangan_id = $this->input->get('id');
+        $data['undangan'] = $this->ModelUndangan->get_by_id($undangan_id);
 
         if ($data['undangan']) {
-            // Mendapatkan daftar tamu berdasarkan id_golongan dari undangan
             $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
             $data['title'] = 'Daftar Buku Tamu';
 
             $id_golongan = $data['undangan']->golongan_id;
             $data['tamu'] = $this->ModelTamu->get_tamu_by_golongan($id_golongan);
-
-            // Mendapatkan buku tamu berdasarkan id undangan
             $data['buku_tamu'] = $this->ModelBukuTamu->get_buku_tamu_by_undangan($undangan_id);
 
-            // Load view untuk menampilkan buku tamu
             $this->load->view('templates/header', $data);
             $this->load->view('templates/navbar', $data);
             $this->load->view('templates/topbar', $data);
-            $this->load->view('admin/bukuTamu', $data); // Pastikan sesuaikan dengan nama file view yang Anda gunakan
+            $this->load->view('admin/bukuTamu', $data);
             $this->load->view('templates/footer', $data);
         } else {
-            // Handle case when undangan with given id is not found
             echo "Undangan tidak ditemukan";
         }
     }
+
+    public function cetakBukuTamu()
+{
+    $undangan_id = $this->input->get('id');
+    $undangan = $this->ModelUndangan->get_by_id($undangan_id);
+
+    if ($undangan) {
+        $id_golongan = $undangan->golongan_id;
+        $dataTamu = $this->ModelTamu->get_tamu_by_golongan($id_golongan);
+        $bukuTamu = $this->ModelBukuTamu->get_buku_tamu_by_undangan($undangan_id);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set Title
+        $title = 'Daftar Buku Tamu - ' . $undangan->nama_acara; // Menambahkan nama acara ke judul
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Set Print Date
+        $printDate = 'Tanggal Cetak: ' . date('d-m-Y');
+        $sheet->setCellValue('A2', $printDate);
+        $sheet->mergeCells('A2:E2');
+        $sheet->getStyle('A2')->getFont()->setSize(12);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        // Set Column Headers
+        $sheet->setCellValue('A3', 'No');
+        $sheet->setCellValue('B3', 'Nama Tamu');
+        $sheet->setCellValue('C3', 'No HP');
+        $sheet->setCellValue('D3', 'Status Undangan');
+
+        // Set Header Styles
+        $sheet->getStyle('A3:D3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:D3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Fill Data
+        $row = 4;
+        $no = 1;
+        foreach ($dataTamu as $tamu) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $tamu->nama_tamu);
+            $sheet->setCellValue('C' . $row, $tamu->no_hp);
+
+            $status = 'Belum Hadir';
+            foreach ($bukuTamu as $bt) {
+                if ($bt->id_tamu == $tamu->id && $bt->id_undangan == $undangan->id) {
+                    $status = 'Hadir';
+                    break;
+                }
+            }
+            $sheet->setCellValue('D' . $row, $status);
+
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'D') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Buku_Tamu_Undangan_' . $undangan->id . '.xlsx';
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    } else {
+        echo "Undangan tidak ditemukan";
+    }
+}
     public function tambahKehadiran()
     {
         $id_undangan = $this->input->get('id_undangan');
@@ -494,5 +570,58 @@ class Admin extends CI_Controller
             $this->session->set_flashdata('success', 'Data tamu berhasil diupdate.');
             redirect('admin/listTamuGolongan?id=' . $id_golongan); // Redirect ke halaman listTamuGolongan
         }
+    }
+    public function exportTamuGolongan()
+    {
+        $golongan_id = $this->input->get('id');
+        $dataTamu = $this->ModelTamu->get_tamu_by_golongan($golongan_id);
+        $golongan = $this->ModelGolongan->get_by_id($golongan_id);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set Title
+        $title = 'Daftar Tamu Golongan ' . $golongan->nama_golongan;
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:E1'); // Merge cells for title
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Set Column Headers
+        $sheet->setCellValue('A2', 'No');
+        $sheet->setCellValue('B2', 'Nama Tamu');
+        $sheet->setCellValue('C2', 'No HP');
+        $sheet->setCellValue('D2', 'Alamat');
+        $sheet->setCellValue('E2', 'Golongan');
+
+        // Set Header Styles
+        $sheet->getStyle('A2:E2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:E2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Fill Data
+        $row = 3;
+        $no = 1;
+        foreach ($dataTamu as $tamu) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $tamu->nama_tamu);
+            $sheet->setCellValue('C' . $row, $tamu->no_hp);
+            $sheet->setCellValue('D' . $row, $tamu->alamat);
+            $sheet->setCellValue('E' . $row, $tamu->nama_golongan);
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach(range('A', 'E') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Daftar_Tamu_Golongan_' . $golongan->nama_golongan . '.xlsx';
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
     }
 }

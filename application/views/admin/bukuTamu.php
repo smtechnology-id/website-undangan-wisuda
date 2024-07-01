@@ -19,6 +19,7 @@
                     <div class="card-body">
                         <div class="container">
                             <a href="<?= base_url('admin/acara') ?>" class="btn btn-outline-primary mb-3"><i class="ri-arrow-left-line"></i> Kembali</a>
+                            <a href="<?= base_url('admin/cetakBukuTamu?id=') . $undangan->id ?>" class="btn btn-success mb-3">Cetak Excel</a>
                             <table class="table table-bordered mt-3">
                                 <thead>
                                     <tr>
