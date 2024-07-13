@@ -76,62 +76,95 @@ class Admin extends CI_Controller
 
     public function addGolongan()
     {
-        // Set aturan validasi untuk form
+        // Set validation rules for the form
         $this->form_validation->set_rules('nama_golongan', 'Nama Golongan', 'required');
         $this->form_validation->set_rules('keterangan', 'Keterangan', 'required');
+        $this->form_validation->set_rules('periode', 'Periode', 'required');
 
         if ($this->form_validation->run() == FALSE) {
-            // Jika validasi gagal, tampilkan kembali form dengan pesan error
-            $this->load->view('admin/golongan'); // Ganti 'nama_view_form' dengan nama view form Anda
+            // If validation fails, redisplay the form with error messages
+            $this->load->view('admin/golongan'); // Replace 'nama_view_form' with your form view name
         } else {
-            // Tangani input form di sini karena validasi berhasil
+            // Handle form input here since validation is successful
             $nama_golongan = $this->input->post('nama_golongan');
             $keterangan = $this->input->post('keterangan');
+            $periode = $this->input->post('periode');
 
-            // Contoh penyimpanan data ke database menggunakan model
-            $data = array(
-                'nama_golongan' => $nama_golongan,
-                'keterangan' => $keterangan
-            );
+            // Check if the nama_golongan is already unique before saving
+            $is_unique = $this->ModelGolongan->check_unique_golongan($nama_golongan);
 
-            $this->ModelGolongan->insert_data('golongan', $data);
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
-            Data Berhasil Di Tambahkan
-            </div>');
+            if (!$is_unique) {
+                // If not unique, display an error message
+                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">
+                    Nama Golongan Sudah Digunakan
+                </div>');
 
-            // Redirect atau tampilkan pesan sukses
-            redirect('admin/golongan'); // Ganti 'admin/index' dengan halaman yang sesuai
+                // Redirect back to the form
+                redirect('admin/golongan');
+            } else {
+                // If unique, proceed with saving the data
+                $data = array(
+                    'nama_golongan' => $nama_golongan,
+                    'keterangan' => $keterangan,
+                    'periode' => $periode
+                );
+
+                $this->ModelGolongan->insert_data('golongan', $data);
+                $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+                    Data Berhasil Di Tambahkan
+                </div>');
+
+                // Redirect or show success message
+                redirect('admin/golongan'); // Replace 'admin/index' with the appropriate page
+            }
         }
     }
+
     public function updateGolongan()
     {
-        // Set aturan validasi untuk form
+        // Set validation rules for the form
         $this->form_validation->set_rules('id', 'ID', 'required');
         $this->form_validation->set_rules('nama_golongan', 'Nama Golongan', 'required');
         $this->form_validation->set_rules('keterangan', 'Keterangan', 'required');
+        $this->form_validation->set_rules('periode', 'Periode', 'required');
 
         if ($this->form_validation->run() == FALSE) {
-            // Jika validasi gagal, tampilkan kembali form dengan pesan error
-            $this->load->view('admin/golongan'); // Pastikan ini merujuk ke view yang benar
+            // If validation fails, redisplay the form with error messages
+            $this->load->view('admin/golongan'); // Make sure this points to the correct view
         } else {
-            // Tangani input form di sini karena validasi berhasil
+            // Handle form input here since validation is successful
             $id = $this->input->post('id');
             $nama_golongan = $this->input->post('nama_golongan');
             $keterangan = $this->input->post('keterangan');
+            $periode = $this->input->post('periode');
 
-            // Contoh penyimpanan data ke database menggunakan model
-            $data = array(
-                'nama_golongan' => $nama_golongan,
-                'keterangan' => $keterangan
-            );
+            // Check if the updated nama_golongan is unique (excluding the current record)
+            $is_unique = $this->ModelGolongan->check_unique_golongan_update($id, $nama_golongan);
 
-            $this->ModelGolongan->update_data('golongan', $data, $id);
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
-            Data Berhasil Di Update
-            </div>');
+            if (!$is_unique) {
+                // If not unique, display an error message
+                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">
+                    Nama Golongan Sudah Digunakan
+                </div>');
 
-            // Redirect atau tampilkan pesan sukses
-            redirect('admin/golongan'); // Ganti 'admin/golongan' dengan halaman yang sesuai
+                // Redirect back to the form
+                redirect('admin/golongan');
+            } else {
+                // If unique, proceed with saving the updated data
+                $data = array(
+                    'nama_golongan' => $nama_golongan,
+                    'keterangan' => $keterangan,
+                    'periode' => $periode
+                );
+
+                $this->ModelGolongan->update_data('golongan', $data, $id);
+                $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+                    Data Berhasil Di Update
+                </div>');
+
+                // Redirect or show success message
+                redirect('admin/golongan'); // Replace 'admin/golongan' with the appropriate page
+            }
         }
     }
     public function deleteGolongan()
@@ -409,85 +442,90 @@ class Admin extends CI_Controller
     }
 
     public function cetakBukuTamu()
-{
-    $undangan_id = $this->input->get('id');
-    $undangan = $this->ModelUndangan->get_by_id($undangan_id);
-
-    if ($undangan) {
-        $id_golongan = $undangan->golongan_id;
-        $dataTamu = $this->ModelTamu->get_tamu_by_golongan($id_golongan);
-        $bukuTamu = $this->ModelBukuTamu->get_buku_tamu_by_undangan($undangan_id);
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Set Title
-        $title = 'Daftar Buku Tamu - ' . $undangan->nama_acara; // Menambahkan nama acara ke judul
-        $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:E1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Set Print Date
-        $printDate = 'Tanggal Cetak: ' . date('d-m-Y');
-        $sheet->setCellValue('A2', $printDate);
-        $sheet->mergeCells('A2:E2');
-        $sheet->getStyle('A2')->getFont()->setSize(12);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // Set Column Headers
-        $sheet->setCellValue('A3', 'No');
-        $sheet->setCellValue('B3', 'Nama Tamu');
-        $sheet->setCellValue('C3', 'No HP');
-        $sheet->setCellValue('D3', 'Status Undangan');
-
-        // Set Header Styles
-        $sheet->getStyle('A3:D3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:D3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Fill Data
-        $row = 4;
-        $no = 1;
-        foreach ($dataTamu as $tamu) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $tamu->nama_tamu);
-            $sheet->setCellValue('C' . $row, $tamu->no_hp);
-
-            $status = 'Belum Hadir';
-            foreach ($bukuTamu as $bt) {
-                if ($bt->id_tamu == $tamu->id && $bt->id_undangan == $undangan->id) {
-                    $status = 'Hadir';
-                    break;
+    {
+        $undangan_id = $this->input->get('id');
+        $undangan = $this->ModelUndangan->get_by_id($undangan_id);
+    
+        if ($undangan) {
+            $id_golongan = $undangan->golongan_id;
+            $dataTamu = $this->ModelTamu->get_tamu_by_golongan($id_golongan);
+            $bukuTamu = $this->ModelBukuTamu->get_buku_tamu_by_undangan($undangan_id);
+    
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+    
+            // Set Title
+            $title = 'Daftar Buku Tamu - ' . $undangan->nama_acara; // Menambahkan nama acara ke judul
+            $sheet->setCellValue('A1', $title);
+            $sheet->mergeCells('A1:E1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    
+            // Set Print Date
+            $printDate = 'Tanggal Cetak: ' . date('d-m-Y');
+            $sheet->setCellValue('A2', $printDate);
+            $sheet->mergeCells('A2:E2');
+            $sheet->getStyle('A2')->getFont()->setSize(12);
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    
+            // Set Column Headers
+            $sheet->setCellValue('A3', 'No');
+            $sheet->setCellValue('B3', 'Nama Tamu');
+            $sheet->setCellValue('C3', 'No HP');
+            $sheet->setCellValue('D3', 'Status Undangan');
+            $sheet->setCellValue('E3', 'Waktu Hadir'); // Perbaiki header kolom
+    
+            // Set Header Styles
+            $sheet->getStyle('A3:E3')->getFont()->setBold(true);
+            $sheet->getStyle('A3:E3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    
+            // Fill Data
+            $row = 4;
+            $no = 1;
+            foreach ($dataTamu as $tamu) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $tamu->nama_tamu);
+                $sheet->setCellValue('C' . $row, $tamu->no_hp);
+    
+                $status = 'Belum Hadir';
+                $waktu_hadir = '';
+                foreach ($bukuTamu as $bt) {
+                    if ($bt->id_tamu == $tamu->id && $bt->id_undangan == $undangan->id) {
+                        $status = 'Hadir';
+                        $waktu_hadir = date('d-m-Y H:i:s', strtotime($bt->waktu)); // Format waktu
+                        break;
+                    }
                 }
+                $sheet->setCellValue('D' . $row, $status);
+                $sheet->setCellValue('E' . $row, $waktu_hadir); // Isi kolom waktu hadir
+    
+                $row++;
             }
-            $sheet->setCellValue('D' . $row, $status);
-
-            $row++;
+    
+            // Auto-size columns
+            foreach (range('A', 'E') as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
+            }
+    
+            $writer = new Xlsx($spreadsheet);
+            $filename = 'Buku_Tamu_Undangan_' . $undangan->nama_acara . '.xlsx';
+    
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+    
+            $writer->save('php://output');
+        } else {
+            echo "Undangan tidak ditemukan";
         }
-
-        // Auto-size columns
-        foreach (range('A', 'D') as $columnID) {
-            $sheet->getColumnDimension($columnID)->setAutoSize(true);
-        }
-
-        $writer = new Xlsx($spreadsheet);
-        $filename = 'Buku_Tamu_Undangan_' . $undangan->id . '.xlsx';
-
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
-    } else {
-        echo "Undangan tidak ditemukan";
     }
-}
+    
     public function tambahKehadiran()
     {
         $id_undangan = $this->input->get('id_undangan');
         $id_tamu = $this->input->get('id_tamu');
 
-        // Periksa apakah entri sudah ada
+        // Check for existing entry using id_undangan and id_tamu
         $existing_entry = $this->db->get_where('buku_tamu', [
             'id_undangan' => $id_undangan,
             'id_tamu' => $id_tamu
@@ -497,7 +535,8 @@ class Admin extends CI_Controller
             $data = [
                 'id_undangan' => $id_undangan,
                 'id_tamu' => $id_tamu,
-                'status' => 'hadir'
+                'status' => 'hadir',
+                'waktu' => date('Y-m-d H:i:s') // Use 'date()' for current datetime
             ];
 
             $this->ModelBukuTamu->insert_data('buku_tamu', $data);
@@ -506,6 +545,8 @@ class Admin extends CI_Controller
             echo "Tamu sudah terdaftar hadir.";
         }
     }
+
+
     public function undanganWisuda()
     {
         $id_undangan = $this->input->get('id_undangan');
@@ -611,7 +652,7 @@ class Admin extends CI_Controller
         }
 
         // Auto-size columns
-        foreach(range('A', 'E') as $columnID) {
+        foreach (range('A', 'E') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 

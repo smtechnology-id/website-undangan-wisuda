@@ -43,4 +43,28 @@ class ModelGolongan extends CI_Model
     {
         return $this->db->count_all('golongan');
     }
+    public function check_unique_golongan($nama_golongan)
+    {
+        $this->db->select('id')->from('golongan')->where('nama_golongan', $nama_golongan);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+    public function check_unique_golongan_update($id, $nama_golongan)
+    {
+        $this->db->select('id')->from('golongan')->where('nama_golongan', $nama_golongan)->where('id !=', $id);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+
+    
 }

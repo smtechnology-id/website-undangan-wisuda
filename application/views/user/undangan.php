@@ -41,14 +41,18 @@ function format_indonesia($date_string)
                                             <th>Detail Acara</th>
                                             <th>Golongan</th>
                                             <th>Status</th>
+                                            <th>Tamu Undangan</th>
                                             <th>Link Preview</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <?php
+                                            $no = 1;
+                                        ?>
                                         <?php foreach ($undangan as $u) : ?>
                                             <tr>
-                                                <td><?= $u->id ?></td>
+                                                <td><?= $no++ ?></td>
                                                 <td><?= $u->nama_acara ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detail<?= $u->id ?>">Detail</button>
@@ -102,7 +106,11 @@ function format_indonesia($date_string)
                                                 </td>
                                                 <td><?= $u->nama_golongan ?></td> <!-- Menampilkan nama golongan -->
                                                 <td><?= $u->status ?></td>
+                                                <td>
+                                                    <a href="<?= base_url('user/listTamuGolongan') ?>?id=<?= $u->golongan_id ?>" class="btn btn-outline-primary">Lhat Tamu Undangan</a>
+                                                </td>
                                                 <td><a href="<?= base_url('user/preview') ?>?id=<?= $u->id ?>" class="btn btn-link" target="_blank">Preview Undangan</a></td>
+                                                
                                                 <td>
                                                     <?php if ($u->status == 'accepted') : ?>
                                                         <span>Undangan telah disetujui</span>

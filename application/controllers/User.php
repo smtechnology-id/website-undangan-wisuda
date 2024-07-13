@@ -39,20 +39,34 @@ class User extends CI_Controller
         $this->load->view('templates/footer', $data);
     }
     public function undangan()
-{
-    $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
-    $data['golongan'] = $this->ModelGolongan->get_golongan_with_tamu_count();
-    $data['tamu_count_by_golongan'] = $this->ModelTamu->get_tamu_count_by_golongan(); // Data jumlah tamu per golongan
-    $data['undangan'] = $this->ModelUndangan->get_undangan_with_golongan(); // Fetch all data for the undangan table
+    {
+        $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
+        $data['golongan'] = $this->ModelGolongan->get_golongan_with_tamu_count();
+        $data['tamu_count_by_golongan'] = $this->ModelTamu->get_tamu_count_by_golongan(); // Data jumlah tamu per golongan
+        $data['undangan'] = $this->ModelUndangan->get_undangan_with_golongan(); // Fetch all data for the undangan table
 
-    $data['title'] = 'Daftar Undangan';
-    $this->load->view('templates/header', $data);
-    $this->load->view('templates/navbar', $data);
-    $this->load->view('templates/topbar', $data);
-    $this->load->view('user/undangan', $data);
-    $this->load->view('templates/footer', $data);
-}
+        $data['title'] = 'Daftar Undangan';
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);
+        $this->load->view('templates/topbar', $data);
+        $this->load->view('user/undangan', $data);
+        $this->load->view('templates/footer', $data);
+    }
 
+    public function listTamuGolongan()
+    {
+        $golongan_id = $this->input->get('id');
+        $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
+        $data['tamu'] = $this->ModelTamu->get_tamu_by_golongan($golongan_id);
+        $data['golongan'] = $this->ModelGolongan->get_by_id($golongan_id); // Changed here
+        $data['title'] = 'Daftar Tamu Undangan ';
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);
+        $this->load->view('templates/topbar', $data);
+        $this->load->view('user/list_tamu_golongan', $data);
+        $this->load->view('templates/footer', $data);
+    }
 
 
     public function preview()

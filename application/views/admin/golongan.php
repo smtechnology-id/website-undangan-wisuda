@@ -31,6 +31,7 @@
                                         <td>No</td>
                                         <td>Nama Golongan</td>
                                         <td>Keterangan</td>
+                                        <td>Periode</td>
                                         <td>Jumlah Tamu Undangan</td>
                                         <td>Data Tamu</td>
                                         <td>Aksi</td>
@@ -45,6 +46,7 @@
                                             <td><?= $no++ ?></td>
                                             <td><?= $gol->nama_golongan ?></td>
                                             <td><?= $gol->keterangan ?></td>
+                                            <td><?= $gol->periode ?></td>
                                             <td><?= $gol->jumlah_tamu ?></td>
                                             <td>
                                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTamu<?= $gol->id ?>"><i class="ri-folder-add-fill"></i></button>
@@ -113,6 +115,11 @@
                                                                     <div class="form-group mb-2">
                                                                         <label for="keterangan">Keterangan</label>
                                                                         <textarea name="keterangan" id="keterangan" class="form-control"><?= $gol->keterangan ?></textarea>
+                                                                    </div>
+                                                                    <div class="form-group mb-2">
+                                                                        <label for="periode">Periode</label>
+                                                                        <input type="text" name="periode" id="periode" class="form-control" value="<?= $gol->periode ?>">
+                                                                        <!-- Hidden input untuk menyimpan ID golongan -->
                                                                     </div>
                                                                     <button type="submit" class="btn btn-primary">Save changes</button>
                                                                 </form>
@@ -184,6 +191,11 @@
                             <label for="keterangan">Keterangan</label>
                             <textarea name="keterangan" id="keterangan" class="form-control"></textarea>
                             <?= form_error('keterangan', '<small class="text-danger">', '</small>'); ?>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="periode">Periode</label>
+                            <input type="text" name="periode" id="periode" class="form-control">
+                            <?= form_error('periode', '<small class="text-danger">', '</small>'); ?>
                         </div>
                         <button type="submit" class="btn btn-primary">Save changes</button>
                     </form>

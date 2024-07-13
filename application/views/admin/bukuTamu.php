@@ -56,7 +56,7 @@
                                                 </td>
                                                 <td>
                                                     <?php if ($status == 'Hadir') : ?>
-                                                        <a href="<?= base_url('admin/detailUndangan/') . $undangan->id ?>">Detail Undangan</a>
+                                                        <?= $bt->waktu ?>
                                                     <?php else : ?>
                                                         <a href="<?= base_url('admin/tambahKehadiran?id_undangan=') . $undangan->id . '&id_tamu=' . $t->id ?>" class="btn btn-primary btn-sm">Tambah Kehadiran</a>
                                                     <?php endif; ?>
