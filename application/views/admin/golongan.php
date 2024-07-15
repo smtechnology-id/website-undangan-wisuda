@@ -23,8 +23,8 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="container">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addData">Tambah Data</button>
 
+                            <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addData">Tambah Data</button>
                             <table class="table table-borderless">
                                 <thead>
                                     <tr>
@@ -32,7 +32,6 @@
                                         <td>Nama Golongan</td>
                                         <td>Keterangan</td>
                                         <td>Periode</td>
-                                        <td>Jumlah Tamu Undangan</td>
                                         <td>Data Tamu</td>
                                         <td>Aksi</td>
                                     </tr>
@@ -47,7 +46,6 @@
                                             <td><?= $gol->nama_golongan ?></td>
                                             <td><?= $gol->keterangan ?></td>
                                             <td><?= $gol->periode ?></td>
-                                            <td><?= $gol->jumlah_tamu ?></td>
                                             <td>
                                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTamu<?= $gol->id ?>"><i class="ri-folder-add-fill"></i></button>
                                                 <div id="addTamu<?= $gol->id ?>" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="standard-modalLabel" aria-hidden="true">
@@ -118,8 +116,12 @@
                                                                     </div>
                                                                     <div class="form-group mb-2">
                                                                         <label for="periode">Periode</label>
-                                                                        <input type="text" name="periode" id="periode" class="form-control" value="<?= $gol->periode ?>">
-                                                                        <!-- Hidden input untuk menyimpan ID golongan -->
+                                                                        <select name="periode" id="periode" class="form-control">
+                                                                            <?php foreach ($periode as $p) : ?>
+                                                                                <option value="<?= $p->id ?>"><?= $p->periode ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                        <?= form_error('periode', '<small class="text-danger">', '</small>'); ?>
                                                                     </div>
                                                                     <button type="submit" class="btn btn-primary">Save changes</button>
                                                                 </form>
@@ -194,7 +196,11 @@
                         </div>
                         <div class="form-group mb-2">
                             <label for="periode">Periode</label>
-                            <input type="text" name="periode" id="periode" class="form-control">
+                            <select name="periode_id" id="periode_id" class="form-control">
+                                <?php foreach ($periode as $p) : ?>
+                                    <option value="<?= $p->id ?>"><?= $p->periode ?></option>
+                                <?php endforeach; ?>
+                            </select>
                             <?= form_error('periode', '<small class="text-danger">', '</small>'); ?>
                         </div>
                         <button type="submit" class="btn btn-primary">Save changes</button>

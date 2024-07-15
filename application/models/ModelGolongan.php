@@ -7,6 +7,26 @@ class ModelGolongan extends CI_Model
     {
         return $this->db->get($table);
     }
+    public function get_golongan_with_periode()
+    {
+        $this->db->select('golongan.*, periode.periode');
+        $this->db->from('golongan');
+        $this->db->join('periode', 'golongan.periode_id = periode.id');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    public function get_golongan_by_periode($periode_id)
+    {
+        $this->db->where('periode_id', $periode_id);
+        $query = $this->db->get('golongan');
+        return $query->result();
+    }
+
+    public function get_all_golongan()
+    {
+        $query = $this->db->get('golongan');
+        return $query->result();
+    }
 
     public function insert_data($table, $data)
     {
@@ -65,6 +85,4 @@ class ModelGolongan extends CI_Model
             return TRUE;
         }
     }
-
-    
 }

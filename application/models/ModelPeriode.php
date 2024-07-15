@@ -25,4 +25,5 @@ class ModelPeriode extends CI_Model
         $this->db->where('id', $id); // Sesuaikan dengan nama kolom ID Anda
         return $this->db->delete('periode'); // Sesuaikan dengan nama tabel Anda
     }
+    
 }

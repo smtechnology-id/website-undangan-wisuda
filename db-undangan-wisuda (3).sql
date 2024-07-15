@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 13, 2024 at 06:37 PM
+-- Generation Time: Jul 15, 2024 at 05:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -57,8 +57,34 @@ CREATE TABLE `golongan` (
   `id` int(10) UNSIGNED NOT NULL,
   `nama_golongan` varchar(255) NOT NULL,
   `keterangan` text DEFAULT NULL,
-  `periode` varchar(255) DEFAULT NULL
+  `periode_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `golongan`
+--
+
+INSERT INTO `golongan` (`id`, `nama_golongan`, `keterangan`, `periode_id`) VALUES
+(6, 'Golongan 2', 'Keterangan', 4);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `periode`
+--
+
+CREATE TABLE `periode` (
+  `id` int(11) NOT NULL,
+  `periode` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `periode`
+--
+
+INSERT INTO `periode` (`id`, `periode`) VALUES
+(2, '2024'),
+(4, '2025');
 
 -- --------------------------------------------------------
 
@@ -73,6 +99,13 @@ CREATE TABLE `tamu` (
   `no_hp` varchar(15) DEFAULT NULL,
   `alamat` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tamu`
+--
+
+INSERT INTO `tamu` (`id`, `id_golongan`, `nama_tamu`, `no_hp`, `alamat`) VALUES
+(8, 6, 'cek', '081223073100', 'Alamat\r\n');
 
 -- --------------------------------------------------------
 
@@ -92,6 +125,13 @@ CREATE TABLE `undangan` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `golongan_id` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `undangan`
+--
+
+INSERT INTO `undangan` (`id`, `nama_acara`, `detail_acara`, `waktu`, `tempat`, `alamat_acara`, `link_maps`, `status`, `created_at`, `golongan_id`) VALUES
+(6, 'Seminar Teknologi AI', '-', '2024-07-13 11:42:00', ' Gedung Serbaguna', '-', 'https://goo.gl/maps/example', 'pending', '2024-07-15 10:41:39', 6);
 
 -- --------------------------------------------------------
 
@@ -199,7 +239,8 @@ INSERT INTO `user_sub_menu` (`id`, `menu_id`, `title`, `url`, `icon`, `is_active
 (3, 1, 'Golongan', 'admin/golongan', 'ri-account-circle-fill', 1),
 (5, 1, 'Buat Undangan', 'admin/undangan', 'ri-mail-add-fill', 1),
 (6, 1, 'Acara', 'admin/acara', 'ri-file-3-fill', 1),
-(7, 2, 'Undangan', 'user/undangan', 'ri-mail-send-line', 1);
+(7, 2, 'Undangan', 'user/undangan', 'ri-mail-send-line', 1),
+(8, 1, 'Periode', 'admin/periode', 'ri-timer-2-line', 1);
 
 --
 -- Indexes for dumped tables
@@ -221,6 +262,12 @@ ALTER TABLE `galery`
 -- Indexes for table `golongan`
 --
 ALTER TABLE `golongan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `periode`
+--
+ALTER TABLE `periode`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -287,19 +334,25 @@ ALTER TABLE `galery`
 -- AUTO_INCREMENT for table `golongan`
 --
 ALTER TABLE `golongan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `periode`
+--
+ALTER TABLE `periode`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tamu`
 --
 ALTER TABLE `tamu`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `undangan`
 --
 ALTER TABLE `undangan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -329,7 +382,7 @@ ALTER TABLE `user_role`
 -- AUTO_INCREMENT for table `user_sub_menu`
 --
 ALTER TABLE `user_sub_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

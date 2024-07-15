@@ -41,6 +41,7 @@ function format_indonesia($date_string)
                                             <th>Nama Acara</th>
                                             <th>Detail Acara</th>
                                             <th>Golongan</th>
+                                            <th>Periode</th>
                                             <th>Status</th>
                                             <th>Link Preview</th>
                                             <th>Aksi</th>
@@ -102,8 +103,8 @@ function format_indonesia($date_string)
                                                         </div><!-- /.modal-dialog -->
                                                     </div><!-- /.modal -->
                                                 </td>
-                                                <td><?= $u->nama_golongan ?></td> <!-- Menampilkan nama golongan -->
-                                                <td><?= $u->status ?></td>
+                                                <td><?= $u->nama_golongan ?></td>
+                                                <td><?= $u->periode ?></td>                                                <td><?= $u->status ?></td>
                                                 <td><a href="<?= base_url('admin/preview') ?>?id=<?= $u->id?>" class="btn btn-link">Preview Undangan</a></td>
                                                 <td>
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#update<?= $u->id ?>">Update</button>

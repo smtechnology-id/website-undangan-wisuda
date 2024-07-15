@@ -67,6 +67,9 @@ class Admin extends CI_Controller
         $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
         $data['golongan'] = $this->ModelGolongan->get_golongan_with_tamu_count();
         $data['title'] = 'Daftar Golongan';
+        $data['periode'] = $this->ModelPeriode->get_data('periode')->result();
+        $data['golongan'] = $this->ModelGolongan->get_golongan_with_periode();
+
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);
@@ -80,16 +83,27 @@ class Admin extends CI_Controller
         // Set validation rules for the form
         $this->form_validation->set_rules('nama_golongan', 'Nama Golongan', 'required');
         $this->form_validation->set_rules('keterangan', 'Keterangan', 'required');
-        $this->form_validation->set_rules('periode', 'Periode', 'required');
+        $this->form_validation->set_rules('periode_id', 'Periode', 'required');
 
         if ($this->form_validation->run() == FALSE) {
             // If validation fails, redisplay the form with error messages
-            $this->load->view('admin/golongan'); // Replace 'nama_view_form' with your form view name
+            $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
+            $data['golongan'] = $this->ModelGolongan->get_golongan_with_tamu_count();
+            $data['title'] = 'Daftar Golongan';
+            $data['periode'] = $this->ModelPeriode->get_data('periode')->result();
+            $data['golongan'] = $this->ModelGolongan-> get_golongan_with_periode();
+
+
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/navbar', $data);
+            $this->load->view('templates/topbar', $data);
+            $this->load->view('admin/golongan', $data);
+            $this->load->view('templates/footer', $data);
         } else {
             // Handle form input here since validation is successful
             $nama_golongan = $this->input->post('nama_golongan');
             $keterangan = $this->input->post('keterangan');
-            $periode = $this->input->post('periode');
+            $periode_id = $this->input->post('periode_id');
 
             // Check if the nama_golongan is already unique before saving
             $is_unique = $this->ModelGolongan->check_unique_golongan($nama_golongan);
@@ -107,7 +121,7 @@ class Admin extends CI_Controller
                 $data = array(
                     'nama_golongan' => $nama_golongan,
                     'keterangan' => $keterangan,
-                    'periode' => $periode
+                    'periode_id' => $periode_id
                 );
 
                 $this->ModelGolongan->insert_data('golongan', $data);
@@ -155,7 +169,7 @@ class Admin extends CI_Controller
                 $data = array(
                     'nama_golongan' => $nama_golongan,
                     'keterangan' => $keterangan,
-                    'periode' => $periode
+                    'periode_id' => $periode
                 );
 
                 $this->ModelGolongan->update_data('golongan', $data, $id);
@@ -197,7 +211,13 @@ class Admin extends CI_Controller
         $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
         $data['golongan'] = $this->ModelGolongan->get_golongan_with_tamu_count();
         $data['tamu_count_by_golongan'] = $this->ModelTamu->get_tamu_count_by_golongan(); // Data jumlah tamu per golongan
-        $data['undangan'] = $this->ModelUndangan->get_undangan_with_golongan('undangan'); // Fetch data for the undangan table
+
+        // Ambil data undangan beserta periode dari tabel periode
+        $this->db->select('undangan.*, golongan.nama_golongan, periode.periode');
+        $this->db->from('undangan');
+        $this->db->join('golongan', 'undangan.golongan_id = golongan.id');
+        $this->db->join('periode', 'golongan.periode_id = periode.id');
+        $data['undangan'] = $this->db->get()->result();
 
         $data['title'] = 'Daftar Undangan';
         $this->load->view('templates/header', $data);
