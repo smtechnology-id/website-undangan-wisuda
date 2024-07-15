@@ -23,6 +23,7 @@ class Admin extends CI_Controller
         $this->load->model('ModelUndangan');
         $this->load->model('ModelTamu');
         $this->load->model('ModelBukuTamu');
+        $this->load->model('ModelPeriode');
     }
     function hariIndo($tanggal)
     {
@@ -445,40 +446,40 @@ class Admin extends CI_Controller
     {
         $undangan_id = $this->input->get('id');
         $undangan = $this->ModelUndangan->get_by_id($undangan_id);
-    
+
         if ($undangan) {
             $id_golongan = $undangan->golongan_id;
             $dataTamu = $this->ModelTamu->get_tamu_by_golongan($id_golongan);
             $bukuTamu = $this->ModelBukuTamu->get_buku_tamu_by_undangan($undangan_id);
-    
+
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-    
+
             // Set Title
             $title = 'Daftar Buku Tamu - ' . $undangan->nama_acara; // Menambahkan nama acara ke judul
             $sheet->setCellValue('A1', $title);
             $sheet->mergeCells('A1:E1');
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
             $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    
+
             // Set Print Date
             $printDate = 'Tanggal Cetak: ' . date('d-m-Y');
             $sheet->setCellValue('A2', $printDate);
             $sheet->mergeCells('A2:E2');
             $sheet->getStyle('A2')->getFont()->setSize(12);
             $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-    
+
             // Set Column Headers
             $sheet->setCellValue('A3', 'No');
             $sheet->setCellValue('B3', 'Nama Tamu');
             $sheet->setCellValue('C3', 'No HP');
             $sheet->setCellValue('D3', 'Status Undangan');
             $sheet->setCellValue('E3', 'Waktu Hadir'); // Perbaiki header kolom
-    
+
             // Set Header Styles
             $sheet->getStyle('A3:E3')->getFont()->setBold(true);
             $sheet->getStyle('A3:E3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    
+
             // Fill Data
             $row = 4;
             $no = 1;
@@ -486,7 +487,7 @@ class Admin extends CI_Controller
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $tamu->nama_tamu);
                 $sheet->setCellValue('C' . $row, $tamu->no_hp);
-    
+
                 $status = 'Belum Hadir';
                 $waktu_hadir = '';
                 foreach ($bukuTamu as $bt) {
@@ -498,28 +499,28 @@ class Admin extends CI_Controller
                 }
                 $sheet->setCellValue('D' . $row, $status);
                 $sheet->setCellValue('E' . $row, $waktu_hadir); // Isi kolom waktu hadir
-    
+
                 $row++;
             }
-    
+
             // Auto-size columns
             foreach (range('A', 'E') as $columnID) {
                 $sheet->getColumnDimension($columnID)->setAutoSize(true);
             }
-    
+
             $writer = new Xlsx($spreadsheet);
             $filename = 'Buku_Tamu_Undangan_' . $undangan->nama_acara . '.xlsx';
-    
+
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
-    
+
             $writer->save('php://output');
         } else {
             echo "Undangan tidak ditemukan";
         }
     }
-    
+
     public function tambahKehadiran()
     {
         $id_undangan = $this->input->get('id_undangan');
@@ -664,5 +665,84 @@ class Admin extends CI_Controller
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
+    }
+
+    public function periode()
+    {
+        $data['user'] = $this->db->get_where('users', ['email' => $this->session->userdata('email')])->row_array();
+        $data['title'] = 'Daftar Undangan';
+        $data['periode'] = $this->ModelPeriode->get_data('periode')->result();
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);
+        $this->load->view('templates/topbar', $data);
+        $this->load->view('admin/periode', $data);
+        $this->load->view('templates/footer', $data);
+    }
+
+    public function addPeriode()
+    {
+        // Set validation rules
+        $this->form_validation->set_rules('periode', 'Periode', 'required|trim');
+
+        if ($this->form_validation->run() == FALSE) {
+            // Validation failed, reload the form
+            $this->load->view('admin/periode'); // Sesuaikan dengan nama view Anda
+        } else {
+            // Validation succeeded, save data to database
+            $data = [
+                'periode' => $this->input->post('periode', true)
+            ];
+
+            if ($this->ModelPeriode->insert($data)) {
+                // Success, redirect or show success message
+                $this->session->set_flashdata('message', '<div class="alert alert-success">Periode successfully added.</div>');
+                redirect('admin/periode');
+            } else {
+                // Failure, show error message
+                $this->session->set_flashdata('message', '<div class="alert alert-danger">Failed to add Periode.</div>');
+                $this->load->view('admin/periode'); // Sesuaikan dengan nama view Anda
+            }
+        }
+    }
+
+    public function updatePeriode()
+    {
+        // Set validation rules
+        $this->form_validation->set_rules('periode', 'Periode', 'required|trim');
+
+        if ($this->form_validation->run() == FALSE) {
+            // Validation failed, reload the form
+            $this->session->set_flashdata('message', '<div class="alert alert-danger">Failed to update Periode. Please try again.</div>');
+            redirect('admin/periode'); // Sesuaikan dengan nama view atau halaman yang benar
+        } else {
+            // Validation succeeded, update data in database
+            $id = $this->input->post('id', true); // ID dari hidden input
+            $data = [
+                'periode' => $this->input->post('periode', true)
+            ];
+
+            if ($this->ModelPeriode->update($id, $data)) {
+                // Success, redirect or show success message
+                $this->session->set_flashdata('message', '<div class="alert alert-success">Periode successfully updated.</div>');
+                redirect('admin/periode'); // Sesuaikan dengan nama view atau halaman yang benar
+            } else {
+                // Failure, show error message
+                $this->session->set_flashdata('message', '<div class="alert alert-danger">Failed to update Periode. Please try again.</div>');
+                redirect('admin/periode'); // Sesuaikan dengan nama view atau halaman yang benar
+            }
+        }
+    }
+    public function deletePeriode()
+    {
+        $id = $this->input->get('id', true); // Mengambil ID dari parameter URL
+
+        if ($this->ModelPeriode->delete($id)) {
+            // Success, redirect or show success message
+            $this->session->set_flashdata('message', '<div class="alert alert-success">Periode successfully deleted.</div>');
+        } else {
+            // Failure, show error message
+            $this->session->set_flashdata('message', '<div class="alert alert-danger">Failed to delete Periode. Please try again.</div>');
+        }
+        redirect('admin/periode'); // Sesuaikan dengan nama view atau halaman yang benar
     }
 }
